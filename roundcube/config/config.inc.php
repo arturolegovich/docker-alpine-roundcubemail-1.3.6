@@ -1,6 +1,6 @@
 <?php
 
-//$config['enable_installer'] = true;
+$config['enable_installer'] = true;
 
 $config['list_cols'] = array('chbox','subject','status', 'from', 'date', 'size', 'flag', 'attachment','list_cols');
 

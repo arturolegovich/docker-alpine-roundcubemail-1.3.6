@@ -17,6 +17,8 @@ ENV PHP_MAX_FILE_UPLOAD 20
 # Максимальный размер письма  вместе с вложением в письмо
 ENV PHP_MAX_POST        51M
 
+# Добавляем скрипт автозапуска
+COPY start.sh /start.sh
 
 # Добавляем roundcube-1.3.6 в образ
 COPY roundcube /home/roundcube
@@ -46,19 +48,26 @@ RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/a
 #       php7-sqlite3 \
 #       php7-pdo_pgsql \
 #       php7-bcmath \
-        php7-gd \
-        php7-imagick \
 #       php7-odbc \
         php7-pdo_mysql \
 #       php7-pdo_sqlite \
 #       php7-gettext \
-#       php7-xmlreader \
+	php7-xmlreader \
 #       php7-xmlrpc \
 #       php7-bz2 \
 #       php7-iconv \
 #       php7-pdo_dblib \
 #       php7-curl \
 #       php7-ctype \
+# Доп пакеты
+	php7-fileinfo \
+	php7-iconv \
+	php7-intl \
+	php7-exif \
+	php7-ldap \
+        php7-gd \
+        php7-imagick \
+# PHP-FPM
         php7-fpm && \
 
 # Настройка PHP-FPM
@@ -75,10 +84,13 @@ sed -i "s|;*post_max_size =.*|post_max_size = ${PHP_MAX_POST}|i" /etc/php7/php.i
 sed -i "s|;*cgi.fix_pathinfo=.*|cgi.fix_pathinfo= 0|i" /etc/php7/php.ini && \
 
 # Настройка lighttpd
-#sed -i "s|;*include "mod_fastcgi_fpm.conf"|include "mod_fastcgi_fpm.conf"|g" /etc/lighttpd/lighttpd.conf && \
-#var.basedir  = "/var/www/localhost"
-#sed -i "s|;*basedir\s*=\s*/var/www/localhost|var.basedir = '/home/roundcube'|g" /etc/lighttpd/lighttpd.conf && \
+sed -i 's|.*mod_fastcgi_fpm.conf.*|include "mod_fastcgi_fpm.conf"|g' /etc/lighttpd/lighttpd.conf && \
+sed -i 's|.*var.basedir\s*=.*|var.basedir = "/home/roundcube"|g' /etc/lighttpd/lighttpd.conf && \
+sed -i "s|.*server.document-root\s*=.*|server.document-root = var.basedir|g" /etc/lighttpd/lighttpd.conf && \
+chmod a+x /start.sh && \
 
+# Меняем права на файлы и каталоги roundcube
+chmod -R 777 /home/roundcube/temp /home/roundcube/logs && \
 
 # Очистка системы от послеустановочного мусора
 apk del tzdata && \
@@ -94,4 +106,6 @@ VOLUME ["/home/roundcube/config/"]
 EXPOSE 80/tcp 443/tcp
 
 # Entry point
-ENTRYPOINT ["/usr/sbin/php-fpm7"]
+#ENTRYPOINT ["/usr/sbin/php-fpm7"]
+#CMD ["/start.sh"]
+ENTRYPOINT ["/start.sh"]
