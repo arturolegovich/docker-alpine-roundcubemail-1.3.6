@@ -23,6 +23,9 @@ ENV PHP_MAX_POST        51M
 # Добавляем roundcube-1.3.6 в образ
 COPY roundcube /home/roundcube
 
+# Дабавляем файл mime.types
+ADD http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types /home/roundcube/
+
 # Установка небходимого программного обеспечения
 RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/apk/repositories && \
     apk update && \
@@ -92,6 +95,7 @@ chmod a+x /home/roundcube/start.sh && \
 
 # Меняем права на файлы и каталоги roundcube
 chmod -R 777 /home/roundcube/temp /home/roundcube/logs && \
+chmod 644 /home/roundcube/mime.types && \
 
 # Очистка системы от послеустановочного мусора
 apk del tzdata && \
