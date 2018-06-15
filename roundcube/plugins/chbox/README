@@ -1,0 +1,43 @@
+Check box email plugin for rounbcube
+
+Introduction
+----------------------------------------
+This is plugin for roundcube
+
+Install
+----------------------------------------
+
+Open config/main.inc.php or config/config.inc.php
+
+1- Add the plugin to roundcube $config['plugins'] array like:
+
+$config['plugins'] = array(
+    'chbox',
+    'archive',
+    'zipdownload',
+    'jqueryui',
+    'filters',
+    'userinfo',
+    'password',
+    'markasjunk2',
+    'hide_blockquote',
+    'contextmenu',
+    'globaladdressbook',
+    'newmail_notifier',
+    'vcard_attachments',
+);
+
+2- Add 'chbox' column to $rcmail_config['list_cols'] array like:
+
+$rcmail_config['list_cols'] = array('chbox','subject','status', 'from', 'date', 'size', 'flag', 'attachment','list_cols');
+
+Testing
+----------------------------------------
+Tested 14.03.2014 on RoundCube 1.0-RC
+Tested 24.03.2014 on RoundCube 0.9.5
+Tested 31.07.2014 on RoundCube 1.0.1
+Tested 30.08.2014 on RoundCube 1.0.2
+Tested 23.03.2015 on Roundcube 1.0.3
+Tested 23.03.2015 on Roundcube 1.1.0 (UP version to 0.2.4)
+
+Work with roundcube 1.1.5
