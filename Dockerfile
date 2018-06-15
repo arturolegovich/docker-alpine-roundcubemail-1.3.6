@@ -18,7 +18,7 @@ ENV PHP_MAX_FILE_UPLOAD 20
 ENV PHP_MAX_POST        51M
 
 # Добавляем скрипт автозапуска
-COPY start.sh /start.sh
+#COPY start.sh /start.sh
 
 # Добавляем roundcube-1.3.6 в образ
 COPY roundcube /home/roundcube
@@ -52,10 +52,10 @@ RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/a
         php7-pdo_mysql \
 #       php7-pdo_sqlite \
 #       php7-gettext \
-	php7-xmlreader \
-#       php7-xmlrpc \
+	php7-xml \
+#	php7-xmlreader \
+#	php7-xmlrpc \
 #       php7-bz2 \
-#       php7-iconv \
 #       php7-pdo_dblib \
 #       php7-curl \
 #       php7-ctype \
@@ -87,7 +87,8 @@ sed -i "s|;*cgi.fix_pathinfo=.*|cgi.fix_pathinfo= 0|i" /etc/php7/php.ini && \
 sed -i 's|.*mod_fastcgi_fpm.conf.*|include "mod_fastcgi_fpm.conf"|g' /etc/lighttpd/lighttpd.conf && \
 sed -i 's|.*var.basedir\s*=.*|var.basedir = "/home/roundcube"|g' /etc/lighttpd/lighttpd.conf && \
 sed -i "s|.*server.document-root\s*=.*|server.document-root = var.basedir|g" /etc/lighttpd/lighttpd.conf && \
-chmod a+x /start.sh && \
+
+chmod a+x /home/roundcube/start.sh && \
 
 # Меняем права на файлы и каталоги roundcube
 chmod -R 777 /home/roundcube/temp /home/roundcube/logs && \
@@ -108,4 +109,4 @@ EXPOSE 80/tcp 443/tcp
 # Entry point
 #ENTRYPOINT ["/usr/sbin/php-fpm7"]
 #CMD ["/start.sh"]
-ENTRYPOINT ["/start.sh"]
+ENTRYPOINT ["/home/roundcube/start.sh"]
