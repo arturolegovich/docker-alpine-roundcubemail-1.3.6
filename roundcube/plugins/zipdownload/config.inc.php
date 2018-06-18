@@ -13,6 +13,6 @@ $config['zipdownload_attachments'] = 1;
 $config['zipdownload_selection'] = false;
 
 // Charset to use for filenames inside the zip
-$config['zipdownload_charset'] = 'ISO-8859-1';
+$config['zipdownload_charset'] = 'cp866';
 
 ?>

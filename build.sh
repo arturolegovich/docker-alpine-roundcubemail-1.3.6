@@ -1,1 +1,1 @@
-docker build -t rcmail:latest .
+docker build -t rcmail/rcmail:latest .

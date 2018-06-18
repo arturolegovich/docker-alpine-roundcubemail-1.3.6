@@ -20,6 +20,9 @@ ENV PHP_MAX_POST        51M
 # Добавляем скрипт автозапуска
 #COPY start.sh /start.sh
 
+# Добавляем сертификат сервера
+COPY ssl/server.pem /etc/server.pem
+
 # Добавляем roundcube-1.3.6 в образ
 COPY roundcube /home/roundcube
 
@@ -91,11 +94,21 @@ sed -i 's|.*mod_fastcgi_fpm.conf.*|include "mod_fastcgi_fpm.conf"|g' /etc/lightt
 sed -i 's|.*var.basedir\s*=.*|var.basedir = "/home/roundcube"|g' /etc/lighttpd/lighttpd.conf && \
 sed -i "s|.*server.document-root\s*=.*|server.document-root = var.basedir|g" /etc/lighttpd/lighttpd.conf && \
 
+# SSL
+sed -i '/server.modules = (/a\\    "mod_openssl",' /etc/lighttpd/lighttpd.conf && \
+sed -i 's|.*ssl.engine.*|ssl.engine    = "enable"|g' /etc/lighttpd/lighttpd.conf && \
+sed -i 's|.*ssl.pemfile\s*=.*|ssl.pemfile   = "/etc/lighttpd/server.pem"|g' /etc/lighttpd/lighttpd.conf && \
+
 chmod a+x /home/roundcube/start.sh && \
 
 # Меняем права на файлы и каталоги roundcube
 chmod -R 777 /home/roundcube/temp /home/roundcube/logs && \
 chmod 644 /home/roundcube/mime.types && \
+
+# Меняем права доступа на файл сертификата
+mv /etc/server.pem /etc/lighttpd/server.pem && \
+chown lighttpd:lighttpd /etc/lighttpd/server.pem && \
+chmod 400 /etc/lighttpd/server.pem && \
 
 # Очистка системы от послеустановочного мусора
 apk del tzdata && \

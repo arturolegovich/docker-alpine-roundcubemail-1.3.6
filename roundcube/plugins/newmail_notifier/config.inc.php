@@ -7,9 +7,9 @@ $config['newmail_notifier_basic'] = false;
 $config['newmail_notifier_sound'] = false;
 
 // Enables desktop notification
-$config['newmail_notifier_desktop'] = false;
+$config['newmail_notifier_desktop'] = true;
 
 // Desktop notification close timeout in seconds
-$config['newmail_notifier_desktop_timeout'] = 10;
+$config['newmail_notifier_desktop_timeout'] = 120;
 
 ?>
