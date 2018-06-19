@@ -38,6 +38,7 @@ RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/a
     echo "${TIMEZONE}" > /etc/timezone && \
     apk add --update \
 	lighttpd \
+	memcached \
         php7-mcrypt \
         php7-session \
         php7-sockets \
@@ -65,6 +66,7 @@ RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/a
 #       php7-pdo_dblib \
 #       php7-curl \
 #       php7-ctype \
+	php7-memcached \
 # Доп пакеты
 	php7-fileinfo \
 	php7-iconv \
@@ -88,6 +90,9 @@ sed -i "s|;*upload_max_filesize =.*|upload_max_filesize = ${MAX_UPLOAD}|i" /etc/
 sed -i "s|;*max_file_uploads =.*|max_file_uploads = ${PHP_MAX_FILE_UPLOAD}|i" /etc/php7/php.ini && \
 sed -i "s|;*post_max_size =.*|post_max_size = ${PHP_MAX_POST}|i" /etc/php7/php.ini && \
 sed -i "s|;*cgi.fix_pathinfo=.*|cgi.fix_pathinfo= 0|i" /etc/php7/php.ini && \
+# php7-memcached
+sed -i 's|.*session.save_handler.*|session.save_handler = memcached|g' /etc/php7/php.ini && \
+sed -i 's|.*;session.save_path = "/tmp".*|session.save_path = tcp://127.0.0.1:11211|g' /etc/php7/php.ini && \
 
 # Настройка lighttpd
 sed -i 's|.*mod_fastcgi_fpm.conf.*|include "mod_fastcgi_fpm.conf"|g' /etc/lighttpd/lighttpd.conf && \
