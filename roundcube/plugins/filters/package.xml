@@ -16,13 +16,13 @@
 	<lead>
 		<name>Artur Petrov</name>
 		<user>6ec123321</user>
-		<email>admin@gtn18.ru</email>
+		<email>artur@phpchain.ru</email>
 		<active>yes</active>
 	</lead>
 	<date>2017-04-12</date>
 	<version>
-		<release>2.1.6</release>
-		<api>2.1.6</api>
+		<release>2.1.7</release>
+		<api>2.1.7</api>
 	</version>
 	<stability>
 		<release>stable</release>

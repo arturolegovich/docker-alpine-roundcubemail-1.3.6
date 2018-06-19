@@ -3,7 +3,7 @@ Roundcube Plugin Filters
 
 Plugin that adds a new tab to the settings section to create client-side e-mail filtering.
 
-@version 2.1.6
+@version 2.1.7
 @author Roberto Zarrelli <zarrelli@unimol.it>
 @developer Artur Petrov <artur@phpchain.ru>
 
@@ -11,11 +11,10 @@ Installation
 ----------------------------------------
 
 To install the plugin you have to:
-1. PHP requirements: installed imap-module (--with-imap) for working with imap_mime_header_decode() function.
-2. Download zip-archive to Roundcube/plugins folder;
-3. Unzip downloaded zip-archive;
-4. Rename unziped folder to 'filters';
-5. Add "filters" in the plugins section of the roundcube configuration (config/config.inc.php).
+1. Download zip-archive to Roundcube/plugins folder;
+2. Unzip downloaded zip-archive;
+3. Rename unziped folder to 'filters';
+4. Add "filters" in the plugins section of the roundcube configuration (config/config.inc.php).
 For example:
 ```
 $config['plugins'] = array(
@@ -89,7 +88,11 @@ History
 * 2.1.5:
   - Fixed for Roundcubemail 1.2.2.
 * 2.1.6:
-  - Fixed for Roundcubemail 1.2.4
-  - Fixed warnings
-  - Fixed "SAVE" button in settings -> filter rules. Thx @JofO97
-  - Fixed search in Roundcube - thanks to peterkroon
+  - Fixed for Roundcubemail 1.2.4;
+  - Fixed warnings;
+  - Fixed "SAVE" button in settings -> filter rules. Thx @JofO97;
+  - Fixed search in Roundcube - thanks to peterkroon.
+* 2.1.7:
+  - Fixed for Roundcubemail 1.3.4;
+  - Fixed error "The fields Contains must not be empty"... but the field isn't empty when adding a filter - thanks to derekisbusy (Merge pull request #28 from derekisbusy/master);
+  - Fixed PHP Warning: Invalid argument supplied for foreach() in /sites/www/roundcube/plugins/filters/filters.php on line 247 - thanks to BeBest123 (Merge pull request #32 from BeBest123/patch-1).

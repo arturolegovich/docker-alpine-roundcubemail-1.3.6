@@ -46,25 +46,22 @@ require_once 'PEAR.php';
 require_once 'Net/Socket.php';
 
 /**
- * TODO
- *
- * o supportsAuthMech()
- */
-
-/**
  * Disconnected state
+ *
  * @const NET_SIEVE_STATE_DISCONNECTED
  */
 define('NET_SIEVE_STATE_DISCONNECTED', 1, true);
 
 /**
  * Authorisation state
+ *
  * @const NET_SIEVE_STATE_AUTHORISATION
  */
 define('NET_SIEVE_STATE_AUTHORISATION', 2, true);
 
 /**
  * Transaction state
+ *
  * @const NET_SIEVE_STATE_TRANSACTION
  */
 define('NET_SIEVE_STATE_TRANSACTION', 3, true);
@@ -79,6 +76,7 @@ define('NET_SIEVE_STATE_TRANSACTION', 3, true);
  * @author    Damian Fernandez Sosa <damlists@cnba.uba.ar>
  * @author    Anish Mistry <amistry@am-productions.biz>
  * @author    Jan Schneider <jan@horde.org>
+ * @author    Neil Munday <neil@mundayweb.com>
  * @copyright 2002-2003 Richard Heyes
  * @copyright 2006-2008 Anish Mistry
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD
@@ -103,7 +101,8 @@ class Net_Sieve
         'CRAM-MD5',
         'EXTERNAL',
         'PLAIN' ,
-        'LOGIN'
+        'LOGIN',
+        'GSSAPI'
     );
 
     /**
@@ -195,6 +194,20 @@ class Net_Sieve
     var $_maxReferralCount = 15;
 
     /**
+     * Kerberos service principal to use for GSSAPI authentication.
+     *
+     * @var string
+     */
+    var $_gssapiPrincipal = null;
+
+    /**
+     * Kerberos service cname to use for GSSAPI authentication.
+     *
+     * @var string
+     */
+    var $_gssapiCN = null;
+
+    /**
      * Constructor.
      *
      * Sets up the object, connects to the server and logs in. Stores any
@@ -216,11 +229,15 @@ class Net_Sieve
      * @param array   $options    Additional options for
      *                            stream_context_create().
      * @param mixed   $handler    A callback handler for the debug output.
+     * @param string  $principal  Kerberos service principal to use
+     *                            with GSSAPI authentication.
+     * @param string  $cname      Kerberos service cname to use
+     *                            with GSSAPI authentication.
      */
     function __construct($user = null, $pass  = null, $host = 'localhost',
         $port = 2000, $logintype = '', $euser = '',
         $debug = false, $bypassAuth = false, $useTLS = true,
-        $options = null, $handler = null
+        $options = null, $handler = null, $principal = null, $cname = null
     ) {
         $this->_pear = new PEAR();
         $this->_state             = NET_SIEVE_STATE_DISCONNECTED;
@@ -234,6 +251,9 @@ class Net_Sieve
         $this->_bypassAuth        = $bypassAuth;
         $this->_useTLS            = $useTLS;
         $this->_options           = (array) $options;
+        $this->_gssapiPrincipal   = $principal;
+        $this->_gssapiCN          = $cname;
+
         $this->setDebug($debug, $handler);
 
         /* Try to include the Auth_SASL package.  If the package is not
@@ -274,6 +294,32 @@ class Net_Sieve
     {
         $this->_debug = $debug;
         $this->_debug_handler = $handler;
+    }
+
+    /**
+     * Sets the Kerberos service principal for use with GSSAPI
+     * authentication.
+     *
+     * @param string $principal The Kerberos service principal
+     *
+     * @return void
+     */
+    function setServicePrincipal($principal)
+    {
+        $this->_gssapiPrincipal = $principal;
+    }
+
+    /**
+     * Sets the Kerberos service CName for use with GSSAPI
+     * authentication.
+     *
+     * @param string $cname The Kerberos service principal
+     *
+     * @return void
+     */
+    function setServiceCN($cname)
+    {
+        $this->_gssapiCN = $cname;
     }
 
     /**
@@ -328,21 +374,29 @@ class Net_Sieve
 
         if ($this->_bypassAuth) {
             $this->_state = NET_SIEVE_STATE_TRANSACTION;
+
+            // Reset capabilities
+            $this->_parseCapability('');
         } else {
             $this->_state = NET_SIEVE_STATE_AUTHORISATION;
+
             $res = $this->_doCmd();
             if (is_a($res, 'PEAR_Error')) {
                 return $res;
             }
+
+            // Reset capabilities (use unattended capabilities)
+            $this->_parseCapability($res);
         }
 
-        // Explicitly ask for the capabilities in case the connection is
-        // picked up from an existing connection.
-        $res = $this->_cmdCapability();
-        if (is_a($res, 'PEAR_Error')) {
-            return $this->_pear->raiseError(
-                'Failed to connect, server said: ' . $res->getMessage(), 2
-            );
+        // Explicitly ask for the capabilities if needed
+        if (empty($this->_capability['implementation'])) {
+            $res = $this->_cmdCapability();
+            if (is_a($res, 'PEAR_Error')) {
+                return $this->_pear->raiseError(
+                    'Failed to connect, server said: ' . $res->getMessage(), 2
+                );
+            }
         }
 
         // Check if we can enable TLS via STARTTLS.
@@ -400,6 +454,7 @@ class Net_Sieve
                 return $res;
             }
         }
+
         $this->_state = NET_SIEVE_STATE_TRANSACTION;
 
         return true;
@@ -408,15 +463,21 @@ class Net_Sieve
     /**
      * Returns an indexed array of scripts currently on the server.
      *
-     * @return array  Indexed array of scriptnames.
+     * @param string $active Will be set to the name of the active script
+     *
+     * @return array  Indexed array of scriptnames, PEAR_Error on failure
      */
-    function listScripts()
+    function listScripts(&$active = null)
     {
         if (is_array($scripts = $this->_cmdListScripts())) {
+            if (isset($scripts[1])) {
+                $active = $scripts[1];
+            }
+
             return $scripts[0];
-        } else {
-            return $scripts;
         }
+
+        return $scripts;
     }
 
     /**
@@ -470,9 +531,11 @@ class Net_Sieve
         if (is_a($res, 'PEAR_Error')) {
             return $res;
         }
+
         if ($makeactive) {
             return $this->_cmdSetActive($scriptname);
         }
+
         return true;
     }
 
@@ -508,6 +571,7 @@ class Net_Sieve
         if (is_a($res, 'PEAR_Error')) {
             return $res;
         }
+
         return true;
     }
 
@@ -521,6 +585,7 @@ class Net_Sieve
         if (NET_SIEVE_STATE_DISCONNECTED == $this->_state) {
             return $this->_pear->raiseError('Not currently connected', 7);
         }
+
         return $this->_capability['extensions'];
     }
 
@@ -560,6 +625,7 @@ class Net_Sieve
         if (NET_SIEVE_STATE_DISCONNECTED == $this->_state) {
             return $this->_pear->raiseError('Not currently connected', 7);
         }
+
         return $this->_capability['sasl'];
     }
 
@@ -578,6 +644,7 @@ class Net_Sieve
         }
 
         $method = trim($this->_toUpper($method));
+
         if (is_array($this->_capability['sasl'])) {
             foreach ($this->_capability['sasl'] as $sasl) {
                 if ($sasl == $method) {
@@ -606,6 +673,7 @@ class Net_Sieve
         if (is_a($method, 'PEAR_Error')) {
             return $method;
         }
+
         switch ($method) {
         case 'DIGEST-MD5':
             return $this->_authDigestMD5($uid, $pwd, $euser);
@@ -621,6 +689,9 @@ class Net_Sieve
         case 'EXTERNAL':
             $result = $this->_authEXTERNAL($uid, $pwd, $euser);
             break;
+        case 'GSSAPI':
+            $result = $this->_authGSSAPI($pwd);
+            break;
         default :
             $result = $this->_pear->raiseError(
                 $method . ' is not a supported authentication method'
@@ -633,7 +704,6 @@ class Net_Sieve
             return $res;
         }
 
-        // Query the server capabilities again now that we are authenticated.
         if ($this->_pear->isError($res = $this->_cmdCapability())) {
             return $this->_pear->raiseError(
                 'Failed to connect, server said: ' . $res->getMessage(), 2
@@ -663,6 +733,66 @@ class Net_Sieve
     }
 
     /**
+     * Authenticates the user using the GSSAPI method.
+     *
+     * @note the PHP krb5 extension is required and the service principal and cname
+     *       must have been set.
+     * @see  setServicePrincipal()
+     *
+     * @return void
+     */
+    function _authGSSAPI()
+    {
+        if (!extension_loaded('krb5')) {
+            return $this->_pear->raiseError('The krb5 extension is required for GSSAPI authentication', 2);
+        }
+
+        if (!$this->_gssapiPrincipal) {
+            return $this->_pear->raiseError('No Kerberos service principal set', 2);
+        }
+
+        if (!$this->_gssapiCN) {
+            return $this->_pear->raiseError('No Kerberos service CName set', 2);
+        }
+
+        putenv('KRB5CCNAME=' . $this->_gssapiCN);
+
+        try {
+            $ccache = new KRB5CCache();
+            $ccache->open($this->_gssapiCN);
+
+            $gssapicontext = new GSSAPIContext();
+            $gssapicontext->acquireCredentials($ccache);
+
+            $token   = '';
+            $success = $gssapicontext->initSecContext($this->_gssapiPrincipal, null, null, null, $token);
+            $token   = base64_encode($token);
+        }
+        catch (Exception $e) {
+            return $this->_pear->raiseError('GSSAPI authentication failed: ' . $e->getMessage());
+        }
+
+        $this->_sendCmd("AUTHENTICATE \"GSSAPI\" {" . strlen($token) . "+}");
+
+        $response = $this->_doCmd($token, true);
+
+        try {
+            $challenge = base64_decode(substr($response, 1, -1));
+            $gssapicontext->unwrap($challenge, $challenge);
+            $gssapicontext->wrap($challenge, $challenge, true);
+        }
+        catch (Exception $e) {
+            return $this->_pear->raiseError('GSSAPI authentication failed: ' . $e->getMessage());
+        }
+
+        $response = base64_encode($challenge);
+
+        $this->_sendCmd("{" . strlen($response) . "+}");
+
+        return $this->_sendCmd($response);
+    }
+
+    /**
      * Authenticates the user using the LOGIN method.
      *
      * @param string $user  The userid to authenticate as.
@@ -677,10 +807,12 @@ class Net_Sieve
         if (is_a($result, 'PEAR_Error')) {
             return $result;
         }
+
         $result = $this->_doCmd('"' . base64_encode($user) . '"', true);
         if (is_a($result, 'PEAR_Error')) {
             return $result;
         }
+
         return $this->_doCmd('"' . base64_encode($pass) . '"', true);
     }
 
@@ -742,10 +874,12 @@ class Net_Sieve
         if (is_a($result, 'PEAR_Error')) {
             return $result;
         }
+
         $result = $this->_doCmd('', true);
         if (is_a($result, 'PEAR_Error')) {
             return $result;
         }
+
         if ($this->_toUpper(substr($result, 0, 2)) == 'OK') {
             return;
         }
@@ -769,7 +903,7 @@ class Net_Sieve
      *
      * @return void
      *
-     * @since  1.1.7
+     * @since 1.1.7
      */
     function _authEXTERNAL($user, $pass, $euser)
     {
@@ -777,6 +911,7 @@ class Net_Sieve
             'AUTHENTICATE "EXTERNAL" "%s"',
             base64_encode(strlen($euser) ? $euser : $user)
         );
+
         return $this->_sendCmd($cmd);
     }
 
@@ -797,6 +932,7 @@ class Net_Sieve
         if (is_a($res, 'PEAR_Error')) {
             return $res;
         }
+
         return true;
     }
 
@@ -978,11 +1114,15 @@ class Net_Sieve
                 break;
 
             case 'SASL':
-                $this->_capability['sasl'] = preg_split('/\s+/', $matches[3]);
+                if (!empty($matches[3])) {
+                    $this->_capability['sasl'] = preg_split('/\s+/', $matches[3]);
+                }
                 break;
 
             case 'SIEVE':
-                $this->_capability['extensions'] = preg_split('/\s+/', $matches[3]);
+                if (!empty($matches[3])) {
+                    $this->_capability['extensions'] = preg_split('/\s+/', $matches[3]);
+                }
                 break;
 
             case 'STARTTLS':
@@ -1227,8 +1367,7 @@ class Net_Sieve
 
         if (isset($this->_options['ssl']['crypto_method'])) {
             $crypto_method = $this->_options['ssl']['crypto_method'];
-        }
-        else {
+        } else {
             // There is no flag to enable all TLS methods. Net_SMTP
             // handles enabling TLS similarly.
             $crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT
@@ -1250,16 +1389,20 @@ class Net_Sieve
         if (!preg_match('/^CYRUS TIMSIEVED V([0-9.]+)/', $this->_capability['implementation'], $matches)
             || version_compare($matches[1], '2.3.10', '>=')
         ) {
-            $this->_doCmd();
+            $res = $this->_doCmd();
         }
 
-        // Query the server capabilities again now that we are under
-        // encryption.
-        $res = $this->_cmdCapability();
-        if (is_a($res, 'PEAR_Error')) {
-            return $this->_pear->raiseError(
-                'Failed to connect, server said: ' . $res->getMessage(), 2
-            );
+        // Reset capabilities (use unattended capabilities)
+        $this->_parseCapability(is_string($res) ? $res : '');
+
+        // Query the server capabilities again now that we are under encryption.
+        if (empty($this->_capability['implementation'])) {
+            $res = $this->_cmdCapability();
+            if (is_a($res, 'PEAR_Error')) {
+                return $this->_pear->raiseError(
+                    'Failed to connect, server said: ' . $res->getMessage(), 2
+                );
+            }
         }
 
         return true;
@@ -1275,7 +1418,7 @@ class Net_Sieve
     function _getLineLength($string)
     {
         if (extension_loaded('mbstring')) {
-            return mb_strlen($string, 'latin1');
+            return mb_strlen($string, '8bit');
         } else {
             return strlen($string);
         }

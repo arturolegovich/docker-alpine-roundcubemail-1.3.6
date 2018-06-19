@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0fa40398e569f992447f18ae4e4e634f
+class ComposerStaticInit5810f09d69fc81b649172ae143ea62c2
 {
     public static $prefixLengthsPsr4 = array (
         'E' => 
@@ -20,7 +20,7 @@ class ComposerStaticInit0fa40398e569f992447f18ae4e4e634f
     public static $prefixDirsPsr4 = array (
         'Endroid\\QrCode\\' => 
         array (
-            0 => __DIR__ . '/..' . '/endroid/qrcode/src',
+            0 => __DIR__ . '/..' . '/endroid/qr-code/src',
         ),
         'Composer\\Semver\\' => 
         array (
@@ -105,11 +105,11 @@ class ComposerStaticInit0fa40398e569f992447f18ae4e4e634f
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0fa40398e569f992447f18ae4e4e634f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0fa40398e569f992447f18ae4e4e634f::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit0fa40398e569f992447f18ae4e4e634f::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit0fa40398e569f992447f18ae4e4e634f::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit0fa40398e569f992447f18ae4e4e634f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit5810f09d69fc81b649172ae143ea62c2::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit5810f09d69fc81b649172ae143ea62c2::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit5810f09d69fc81b649172ae143ea62c2::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit5810f09d69fc81b649172ae143ea62c2::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit5810f09d69fc81b649172ae143ea62c2::$classMap;
 
         }, null, ClassLoader::class);
     }
