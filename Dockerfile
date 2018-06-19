@@ -75,6 +75,8 @@ RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/a
 	php7-ldap \
         php7-gd \
         php7-imagick \
+# Кэширование в PHP7
+	php7-opcache \
 # PHP-FPM
         php7-fpm && \
 
