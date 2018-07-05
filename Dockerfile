@@ -33,6 +33,7 @@ ADD http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types /home
 RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/apk/repositories && \
     apk update && \
     apk upgrade && \
+#    apk add --upgrade apk-tools@edge \
     apk add --update tzdata && \
     cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
     echo "${TIMEZONE}" > /etc/timezone && \
