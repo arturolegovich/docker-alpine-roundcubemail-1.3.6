@@ -84,8 +84,8 @@ RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/a
 
 # Настройка PHP-FPM
 sed -i "s|;*daemonize\s*=\s*yes|daemonize = no|g" /etc/php7/php-fpm.conf && \
-#sed -i "s|;*listen\s*=\s*127.0.0.1:9000|listen = '/var/run/php7-fpm.socket'|g" /etc/php7/php-fpm.d/www.conf && \
-sed -i "s|;*listen\s*=\s*127.0.0.1:9000|listen = 127.0.0.1:9000|g" /etc/php7/php-fpm.d/www.conf && \
+sed -i "s|;*listen\s*=\s*127.0.0.1:9000|listen = '/var/run/php7-fpm.socket'|g" /etc/php7/php-fpm.d/www.conf && \
+#sed -i "s|;*listen\s*=\s*127.0.0.1:9000|listen = 127.0.0.1:9000|g" /etc/php7/php-fpm.d/www.conf && \
 sed -i "s|;*listen\s*=\s*/||g" /etc/php7/php-fpm.d/www.conf && \
 sed -i "s|;*listen =.*|date.timezone = ${TIMEZONE}|i" /etc/php7/php.ini && \
 sed -i "s|;*date.timezone =.*|date.timezone = ${TIMEZONE}|i" /etc/php7/php.ini && \
@@ -102,6 +102,12 @@ sed -i "s|;*cgi.fix_pathinfo=.*|cgi.fix_pathinfo= 0|i" /etc/php7/php.ini && \
 sed -i 's|.*mod_fastcgi_fpm.conf.*|include "mod_fastcgi_fpm.conf"|g' /etc/lighttpd/lighttpd.conf && \
 sed -i 's|.*var.basedir\s*=.*|var.basedir = "/home/roundcube"|g' /etc/lighttpd/lighttpd.conf && \
 sed -i "s|.*server.document-root\s*=.*|server.document-root = var.basedir|g" /etc/lighttpd/lighttpd.conf && \
+
+# Настройка mod_fastcgi_fpm на использование php7-fpm.socket
+sed -i 's|.*"host".*|				"socket"=>"/var/run/php7-fpm.socket"|g' /etc/lighttpd/mod_fastcgi_fpm.conf && \
+sed -i 's|.*"port".*||g' /etc/lighttpd/mod_fastcgi_fpm.conf && \
+sed -i 's|.*listen.owner = nobody.*|listen.owner = lighttpd|g' /etc/php7/php-fpm.d/www.conf && \
+sed -i 's|.*listen.group = nobody.*|listen.group = lighttpd|g' /etc/php7/php-fpm.d/www.conf && \
 
 # SSL
 sed -i '/server.modules = (/a\\    "mod_openssl",' /etc/lighttpd/lighttpd.conf && \
