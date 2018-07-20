@@ -108,6 +108,8 @@ sed -i 's|.*"host".*|				"socket"=>"/var/run/php7-fpm.socket"|g' /etc/lighttpd/m
 sed -i 's|.*"port".*||g' /etc/lighttpd/mod_fastcgi_fpm.conf && \
 sed -i 's|.*listen.owner = nobody.*|listen.owner = lighttpd|g' /etc/php7/php-fpm.d/www.conf && \
 sed -i 's|.*listen.group = nobody.*|listen.group = lighttpd|g' /etc/php7/php-fpm.d/www.conf && \
+sed -i 's|.*pm.max_children = 5.*|pm.max_children = 10|g' /etc/php7/php-fpm.d/www.conf && \
+sed -i 's|.*pm.max_spare_servers = 3.*|pm.max_spare_servers = 6|g' /etc/php7/php-fpm.d/www.conf && \
 
 # SSL
 sed -i '/server.modules = (/a\\    "mod_openssl",' /etc/lighttpd/lighttpd.conf && \
