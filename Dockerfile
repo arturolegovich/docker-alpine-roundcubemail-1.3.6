@@ -9,13 +9,19 @@ FROM alpine:latest
 # Часовой пояс
 ENV TIMEZONE            Europe/Samara
 # Объем памяти на один процесс PHP-FPM
-ENV PHP_MEMORY_LIMIT    256M
+ENV PHP_MEMORY_LIMIT    32M
 # Максимальный размер загружаемого файла (вложение в письмо)
 ENV MAX_UPLOAD          50M
 # Количество одновременно загружаемых файлов
 ENV PHP_MAX_FILE_UPLOAD 20
 # Максимальный размер письма  вместе с вложением в письмо
 ENV PHP_MAX_POST        51M
+
+ENV FPM_MAX_CHILDREN 	10
+ENV FPM_START_SERVERS 	2
+ENV FPM_MIN_SPARE_SERVERS 2
+ENV FPM_MAX_SPARE_SERVERS 9
+
 
 # Добавляем скрипт автозапуска
 #COPY start.sh /start.sh
@@ -108,8 +114,10 @@ sed -i 's|.*"host".*|				"socket"=>"/var/run/php7-fpm.socket"|g' /etc/lighttpd/m
 sed -i 's|.*"port".*||g' /etc/lighttpd/mod_fastcgi_fpm.conf && \
 sed -i 's|.*listen.owner = nobody.*|listen.owner = lighttpd|g' /etc/php7/php-fpm.d/www.conf && \
 sed -i 's|.*listen.group = nobody.*|listen.group = lighttpd|g' /etc/php7/php-fpm.d/www.conf && \
-sed -i 's|.*pm.max_children = 5.*|pm.max_children = 10|g' /etc/php7/php-fpm.d/www.conf && \
-sed -i 's|.*pm.max_spare_servers = 3.*|pm.max_spare_servers = 6|g' /etc/php7/php-fpm.d/www.conf && \
+sed -i "s|.*pm.max_children = 5.*|pm.max_children = ${FPM_MAX_CHILDREN}|g" /etc/php7/php-fpm.d/www.conf && \
+sed -i "s|.*pm.start_servers = 2.*|pm.start_servers = ${FPM_START_SERVERS}|g" /etc/php7/php-fpm.d/www.conf && \
+sed -i "s|.*pm.min_spare_servers = 1.*|pm.min_spare_servers = ${FPM_MIN_SPARE_SERVERS}|g" /etc/php7/php-fpm.d/www.conf && \
+sed -i "s|.*pm.max_spare_servers = 3.*|pm.max_spare_servers = ${FPM_MAX_SPARE_SERVERS}|g" /etc/php7/php-fpm.d/www.conf && \
 
 # SSL
 sed -i '/server.modules = (/a\\    "mod_openssl",' /etc/lighttpd/lighttpd.conf && \
