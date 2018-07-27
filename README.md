@@ -11,9 +11,10 @@ php7(FPM)
 imagemagick7
 roundcubemail-1.3.6
 ```
-### В образе оставлена поддержка только MySQL
+### В образе оставлена поддержка только MySQL.
 ### Образ не включает в себя базу данных MySQL и т.п.
 ### Внешний вид (skins): только larry.
+
 
 ## Базовая настройка
 ### Для корректной работы, перед запуском контейнера, необходимо предварительно создать каталоги:
@@ -26,14 +27,47 @@ mkdir /home/roundcube/logs
 chmod -R 655 /home/roundcube
 chmod -R 666 /home/roundcube/logs
 ```
-### Базовая настройка roundcubemail
+### Настройка roundcubemail-1.3.6
 Настройки roundcube будет считывать из каталога /home/roundcube/config.
 Перед запуском контейнера необходимо в этот каталог поместить подготовленные файлы:
 - default.inc.php
 - config.inc.php
 - mimetypes.php
-
 Данные файлы можно получить, скачав исходные коды roundcubemail-1.3.6, с официального сайта roundcube.net.
+
+### Подготовка базы данных
+Допустим MySQL уже где-то установлен и нам надо создать пользователя и базу данных для roundcube.
+Для этого в консоли необходимо выполнить следующие команды:
+
+```
+# Подключаемся к СУБД MySQL и вводим пароль root'а
+mysql -u root -p
+# Создаём базу данных roundcubemail
+CREATE DATABASE roundcubemail;
+# Создаём пользователя roundcube с паролем: myPassword
+CREATE USER 'roundcube'@'%' IDENTIFIED BY 'myPassword';
+# Присваиваем права доступа на БД roundcubemail пользователю roundcube
+GRANT ALL PRIVILEGES ON roundcubemail.* TO 'roundcube'@'%';
+```
+Перед первым запуском контейнера необходимо произвести первичную инициализацию или обновление БД с помощью установщика roundcube.
+Добавляем в конец файла /home/roundcube/config.inc.php дополнительную строку для разрешения на запуск установщика:
+```
+// Включить установщик roundcubemail
+$config['enable_installer'] = true;
+```
+Установчные скрипты располагаются в каталоге /home/roundcube/installer образа rcmail136.
+После запуска контейнера rcmail136 надо перейти по ссылке:
+```
+http(s)://example.com/installer
+```
+Если подключение к БД прошло успешно, то установщик уведомит Вас о том, что БД roundcubemail не инициализирована.
+Выбираем из выпадающего списка последний пункт и щелкаем по кнопке "initialize database".
+После этого проверяем остальные обязательные параметры, должны быть выделены зелёным цветом.
+В конце файла /home/roundcube/config.inc.php изменяем строку для запрета на запуск установщика:
+```
+// Отключить установщик roundcubemail
+$config['enable_installer'] = false;
+```
 
 ### Плагины
 - acl
@@ -78,7 +112,7 @@ chmod -R 666 /home/roundcube/logs
 docker exec rcmail136 ls /home/roundcube/plugins
 ```
 
-## Запуск docker-контейнера
+## Запуск docker-контейнера rcmail136
 ### Параметры по умолчанию
 ```
 # Часовой пояс
