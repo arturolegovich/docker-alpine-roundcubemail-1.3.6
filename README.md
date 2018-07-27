@@ -1,4 +1,4 @@
-# Docker alpine roundcubemail 1.3.6 with php7-fpm imagemagick-7
+# Docker alpine roundcubemail 1.3.6 with php56-fpm imagemagick-7
 
 ## Описание
 
@@ -7,7 +7,7 @@
 Образ включает в себя следующее программное обеспечение:
 ```
 lighttpd(SSL)
-php7(FPM)
+php56(FPM)
 imagemagick7
 roundcubemail-1.3.6
 ```
