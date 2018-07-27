@@ -32,40 +32,40 @@ chmod -R 666 /home/roundcube/logs
 Данные файлы можно получить, скачав исходные коды roundcubemail-1.3.6, с официального сайта roundcube.net.
 
 ### Плагины
--acl
--additional_message_headers
--archive
--attachment_reminder
--autologon
--chbox
--database_attachments
--debug_logger
--emoticons
--enigma
--example_addressbook
--filesystem_attachments
--filters
--help
--hide_blockquote
--http_authentication
--identicon
--identity_select
--jqueryui
--krb_authentication
--managesieve
--markasjunk
--new_user_dialog
--new_user_identity
--newmail_notifier
--redundant_attachments
--show_additional_headers
--squirrelmail_usercopy
--subscriptions_option
--userinfo
--vcard_attachments
--virtuser_file
--virtuser_query
--zipdownload
+- acl
+- additional_message_headers
+- archive
+- attachment_reminder
+- autologon
+- chbox
+- database_attachments
+- debug_logger
+- emoticons
+- enigma
+- example_addressbook
+- filesystem_attachments
+- filters
+- help
+- hide_blockquote
+- http_authentication
+- identicon
+- identity_select
+- jqueryui
+- krb_authentication
+- managesieve
+- markasjunk
+- new_user_dialog
+- new_user_identity
+- newmail_notifier
+- redundant_attachments
+- show_additional_headers
+- squirrelmail_usercopy
+- subscriptions_option
+- userinfo
+- vcard_attachments
+- virtuser_file
+- virtuser_query
+- zipdownload
 
 Большая часть плагинов уже настроена, остальные настройки делаются в файле /home/roundcube/config/config.inc.php.
 
