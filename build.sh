@@ -1,1 +1,1 @@
-docker build -t rcmail/rcmail:latest .
+docker build -t rcmail/rcmail:devel_php56 .
