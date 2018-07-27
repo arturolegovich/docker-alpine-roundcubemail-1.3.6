@@ -48,6 +48,8 @@ CREATE DATABASE roundcubemail;
 CREATE USER 'roundcube'@'%' IDENTIFIED BY 'myPassword';
 # Присваиваем права доступа на БД roundcubemail пользователю roundcube
 GRANT ALL PRIVILEGES ON roundcubemail.* TO 'roundcube'@'%';
+# Обновляем все права доступа MySQL
+FLUSH PRIVILEGES;
 ```
 Перед первым запуском контейнера необходимо произвести первичную инициализацию или обновление БД с помощью установщика roundcube.
 Добавляем в конец файла /home/roundcube/config.inc.php дополнительную строку для разрешения на запуск установщика:
