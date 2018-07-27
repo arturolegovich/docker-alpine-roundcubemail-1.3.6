@@ -1,4 +1,4 @@
-# Docker alpine roundcubemail 1.3.6 with php56-fpm imagemagick-7
+# Docker alpine roundcubemail 1.3.6 with php56-fpm imagemagick-7 memcached php-memcache
 
 ## Описание
 
@@ -10,6 +10,8 @@ lighttpd(SSL)
 php56(FPM)
 imagemagick7
 roundcubemail-1.3.6
+memcached
+php-memcached-3.0.8
 ```
 ### В образе оставлена поддержка только MySQL.
 ### Образ не включает в себя базу данных MySQL и т.п.
@@ -157,6 +159,13 @@ docker run -d --name rcmail136 \
 // managesieve
 $config['managesieve_port'] = 4190;
 $config['managesieve_host'] = '172.17.0.1';
-//mimetypes
+// mimetypes
 $config['mime_types'] = '/home/roundcube/mime.types';
+
+# Memcache
+$config['session_storage'] = 'memcache';
+$config['memcache_debug'] = true;
+$config['imap_cache'] = 'memcache';
+$config['message_cache'] = true;
+$config['memcache_hosts'] = array('127.0.0.1:11211');
 ```

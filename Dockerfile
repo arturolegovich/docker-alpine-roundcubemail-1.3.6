@@ -113,8 +113,6 @@ RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/a
 # Настройка PHP-FPM
 sed -i "s|;*daemonize\s*=\s*yes|daemonize = no|g" /etc/php5/php-fpm.conf && \
 sed -i "s|;*listen\s*=\s*127.0.0.1:9000|listen = '/var/run/php5-fpm.socket'|g" /etc/php5/php-fpm.conf && \
-#sed -i "s|;*listen\s*=\s*127.0.0.1:9000|listen = 127.0.0.1:9000|g" /etc/php5/php-fpm.conf && \
-#sed -i "s|;*listen\s*=\s*/||g" /etc/php7/php-fpm.d/www.conf && \
 sed -i "s|;*cgi.fix_pathinfo=.*|cgi.fix_pathinfo= 0|i" /etc/php5/php.ini && \
 
 # php5-memcache
