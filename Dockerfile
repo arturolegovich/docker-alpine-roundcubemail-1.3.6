@@ -9,18 +9,21 @@ FROM alpine:latest
 # Часовой пояс
 ENV TIMEZONE            Europe/Samara
 # Объем памяти на один процесс PHP-FPM
-ENV PHP_MEMORY_LIMIT    32M
+ENV PHP_MEMORY_LIMIT    64M
 # Максимальный размер загружаемого файла (вложение в письмо)
 ENV MAX_UPLOAD          50M
 # Количество одновременно загружаемых файлов
 ENV PHP_MAX_FILE_UPLOAD 20
 # Максимальный размер письма  вместе с вложением в письмо
 ENV PHP_MAX_POST        51M
-
-ENV FPM_MAX_CHILDREN 	10
-ENV FPM_START_SERVERS 	2
-ENV FPM_MIN_SPARE_SERVERS 2
-ENV FPM_MAX_SPARE_SERVERS 9
+# Максимальное число создаваемых дочерних процессов (pm dynamic)
+ENV FPM_MAX_CHILDREN 	40
+# Число дочерних процессов, создаваемых при запуске (pm dynamic)
+ENV FPM_START_SERVERS 	1
+# Минимальное число неактивных дочерних процессов (pm dynamic)
+ENV FPM_MIN_SPARE_SERVERS 1
+# Максимальное число неактивных дочерних процессов сервера (pm dynamic)
+ENV FPM_MAX_SPARE_SERVERS 10
 
 
 # Добавляем скрипт автозапуска
