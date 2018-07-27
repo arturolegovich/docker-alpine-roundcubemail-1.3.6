@@ -40,7 +40,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(memcache)
 
-inline void mmc_buffer_alloc(mmc_buffer_t *buffer, unsigned int size)  /*
+void mmc_buffer_alloc(mmc_buffer_t *buffer, unsigned int size)  /*
 	ensures space for an additional size bytes {{{ */
 {
 	register size_t newlen;
@@ -48,7 +48,7 @@ inline void mmc_buffer_alloc(mmc_buffer_t *buffer, unsigned int size)  /*
 }
 /* }}} */
 
-inline void mmc_buffer_free(mmc_buffer_t *buffer)  /* {{{ */
+void mmc_buffer_free(mmc_buffer_t *buffer)  /* {{{ */
 {
 	if (buffer->value.c != NULL) {
 		smart_str_free(&(buffer->value));
@@ -1676,7 +1676,7 @@ void mmc_pool_run(mmc_pool_t *pool TSRMLS_DC)  /*
 }
 /* }}} */
 
-inline int mmc_prepare_key_ex(const char *key, unsigned int key_len, char *result, unsigned int *result_len)  /* {{{ */
+int mmc_prepare_key_ex(const char *key, unsigned int key_len, char *result, unsigned int *result_len)  /* {{{ */
 {
 	unsigned int i;
 	if (key_len == 0) {
@@ -1694,7 +1694,7 @@ inline int mmc_prepare_key_ex(const char *key, unsigned int key_len, char *resul
 }
 /* }}} */
 
-inline int mmc_prepare_key(zval *key, char *result, unsigned int *result_len)  /* {{{ */
+int mmc_prepare_key(zval *key, char *result, unsigned int *result_len)  /* {{{ */
 {
 	if (Z_TYPE_P(key) == IS_STRING) {
 		return mmc_prepare_key_ex(Z_STRVAL_P(key), Z_STRLEN_P(key), result, result_len);

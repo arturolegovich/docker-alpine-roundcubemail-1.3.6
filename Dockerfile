@@ -44,9 +44,6 @@ COPY imagick-3.4.3 /imagick-3.4.3-src
 # Добавляем php_memcache
 COPY memcache-3.0.8 /memcache-3.0.8-src
 
-# Добавляем php_imagick
-COPY phpize5 /usr/bin/phpize
-
 # Установка небходимого программного обеспечения
 RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/apk/repositories && \
     apk update && \
@@ -151,8 +148,6 @@ sed -i 's|.*ssl.pemfile\s*=.*|ssl.pemfile   = "/etc/lighttpd/server.pem"|g' /etc
 
 chmod a+x /home/roundcube/start.sh && \
 
-chmod a+x /usr/bin/phpize && \
-
 # Меняем права на файлы и каталоги roundcube
 chmod -R 777 /home/roundcube/temp /home/roundcube/logs && \
 chmod 644 /home/roundcube/mime.types && \
@@ -164,7 +159,7 @@ chmod 400 /etc/lighttpd/server.pem && \
 
 # Сборка php_imagick из исходного кода
 cd /imagick-3.4.3-src && \
-phpize && \
+phpize5 && \
 ./configure --with-php-config=/usr/bin/php-config5 && \
 make && \
 make install && \
@@ -173,7 +168,7 @@ echo "extension=imagick.so" > /etc/php5/conf.d/imagick.ini && \
 
 # Сборка php_memcache из исходного кода
 cd /memcache-3.0.8-src && \
-phpize && \
+phpize5 && \
 ./configure --with-php-config=/usr/bin/php-config5 --with-zlib-dir=/usr && \
 make && \
 make install && \
@@ -197,6 +192,4 @@ VOLUME ["/home/roundcube/config/"]
 EXPOSE 443/tcp
 
 # Entry point
-#ENTRYPOINT ["/usr/sbin/php-fpm5"]
-#CMD ["/start.sh"]
 ENTRYPOINT ["/home/roundcube/start.sh"]
