@@ -162,9 +162,9 @@ $config['managesieve_host'] = '172.17.0.1';
 // mimetypes
 $config['mime_types'] = '/home/roundcube/mime.types';
 
-# Memcache
+// Memcache
 $config['session_storage'] = 'memcache';
-$config['memcache_debug'] = true;
+$config['memcache_debug'] = false;
 $config['imap_cache'] = 'memcache';
 $config['message_cache'] = true;
 $config['memcache_hosts'] = array('127.0.0.1:11211');
