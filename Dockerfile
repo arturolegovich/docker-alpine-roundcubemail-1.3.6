@@ -41,6 +41,9 @@ ADD http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types /home
 # Добавляем php_imagick
 COPY imagick-3.4.3 /imagick-3.4.3-src
 
+# Добавляем php_memcache
+COPY memcache-3.0.8 /memcache-3.0.8-src
+
 # Добавляем php_imagick
 COPY phpize5 /usr/bin/phpize
 
@@ -63,6 +66,10 @@ RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/a
 	libtool \
 	imagemagick \
 	imagemagick-dev \
+	memcached \
+	zlib \
+	zlib-dev \
+	file \
 	lighttpd \
 #	memcached \
         php5-mcrypt \
@@ -161,11 +168,22 @@ phpize && \
 ./configure --with-php-config=/usr/bin/php-config5 && \
 make && \
 make install && \
+make clean && \
 echo "extension=imagick.so" > /etc/php5/conf.d/imagick.ini && \
 
+# Сборка php_memcache из исходного кода
+cd /memcache-3.0.8-src && \
+phpize && \
+./configure --with-php-config=/usr/bin/php-config5 --with-zlib-dir=/usr && \
+make && \
+make install && \
+make clean && \
+echo "extension=memcache.so" > /etc/php5/conf.d/memcache.ini && \
+
 # Очистка системы от послеустановочного мусора
-apk del tzdata automake make gcc g++ autoconf libtool php5-dev imagemagick-dev && \
+apk del tzdata automake make gcc g++ autoconf libtool php5-dev imagemagick-dev file zlib-dev && \
 rm -rf /imagick-3.4.3-src && \
+rm -rf /memcache-3.0.8-src && \
 rm -rf /usr/bin/phpize && \
 rm -rf /var/cache/apk/*
 
