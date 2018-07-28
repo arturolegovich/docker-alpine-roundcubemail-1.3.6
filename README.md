@@ -35,6 +35,7 @@ chmod -R 666 /home/roundcube/logs
 - default.inc.php
 - config.inc.php
 - mimetypes.php
+
 Данные файлы можно получить, скачав исходные коды roundcubemail-1.3.6, с официального сайта roundcube.net.
 
 ### Подготовка базы данных
