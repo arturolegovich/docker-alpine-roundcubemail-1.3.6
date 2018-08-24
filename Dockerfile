@@ -44,6 +44,9 @@ COPY imagick-3.4.3 /imagick-3.4.3-src
 # Добавляем php_memcache
 COPY memcache-3.0.8 /memcache-3.0.8-src
 
+# Добавляем phpize5 для сборки из исходников
+COPY phpize5 /usr/bin/phpize5
+
 # Установка небходимого программного обеспечения
 RUN     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/apk/repositories && \
     apk update && \
@@ -171,7 +174,7 @@ echo "extension=memcache.so" > /etc/php5/conf.d/memcache.ini && \
 apk del tzdata automake make gcc g++ autoconf libtool php5-dev imagemagick-dev file zlib-dev && \
 rm -rf /imagick-3.4.3-src && \
 rm -rf /memcache-3.0.8-src && \
-rm -rf /usr/bin/phpize && \
+rm -rf /usr/bin/phpize5 && \
 rm -rf /var/cache/apk/*
 
 # Set Workdir
